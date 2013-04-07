@@ -1,0 +1,131 @@
+0067-102 12341234 01CBA       Smith John Allan          301500ABA Test    0704131530                                    
+1062-692 43214321 500000000001Smith Joan Emma                 ABA Test CR       067-102 12341234Mr John Smith   00000000
+7999-999            000000000100000000010000000000                        000001                                        
+
+------------------------------------------------------------------------------------------------------------------------
+123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+0        1         2         3         4         5         6         7         8         9        10        11        12
+------------------------------------------------------------------------------------------------------------------------
+EOF should be after 120th chracter of line 3. Everything below that is comments. Lines 6-7 are a ruler of sorts, showing
+the location of characters 1 - 120.
+
+LINE 1: Descriptive Record: file known as "ABA Test" from John Allan Smith BSB 067-102 Acct 12341234 process on
+        2013-04-07 at 15:30 through Commonwealth Bank (NetBank or ComBiz). This is the first file in the batch.
+LINE 2: Detail Record: $0.01 generic credit to Joan Emma Smith BSB 062-292 Acct 43214321 from "Mr John Smith" narration
+        "ABA Test CR". Will come from account 067-102 12341234. No withholding tax.
+LINE 3: Batch Control Record: total credits of $0.01 total debits nil net total $0.01 and total number of records 1.
+
+File must be CR/LF delimited fixed width (each line must be 120 characters).
+
+Direct Entry User ID codes and APCA Bank Codes (as used in descriptive records) are:
+
+    Code    User ID     Bank name
+    ----    -------     ---------
+    CBA     301500      Commonwealth ComBiz
+    CBA     (ignored)   Commonwealth NetBank
+    NAB     (ignored)   nab personal
+    ANZ     (ignored)   ANZ personal
+    WPC     037819      Westpac personal
+
+Each record type contains a number of fields described below (lines 44-113). Headings for those descriptions are:
+
+    S.P = Start position (1..120)
+    E.P = End position (1..120)
+    LEN = Length of field (1..120)
+    T   = Field Type being one of:
+                    A = Alpha                A-Za-z0-9 &',./+$!%()*#=:?[]_^@-
+                        (NB: at least CBA cannot accept characters other than A-Za-z0-9 and space in name fields, and
+                        account fields must contain only A-Za-z0-9, hyphen or space or more limited as bank requires)
+                    N = Unsigned numeric     0-9
+                    F = Fixed Value as described in DESCRIPTION
+    A   = Alignment within field size (L = Left, R = Right)
+    F   = Fill if length of data less than size of field (Z = zero filled, S = space filled)
+
+------------------------------------------------------------------------------------------------------------------------
+DESCRIPTIVE RECORD (Record Type = 0)
+------------------------------------------------------------------------------------------------------------------------
+Must be first record in file. Must be precisely one such record in the file.
+
+S.P  E.P  LEN T A F NAME                DESCRIPTION
+  1    1    1 F - - Record Type         Must be 0 for descriptive record.
+  2    8    7 A L S BSB                 BSB of funds account (formatted 000-000) OR blank (ignored by WPC).
+  9   17    9 A R S Account Number      Account number of fund account (inc leading zeros) OR blank (ignored by WPC).
+ 18   18    1 F - S Reserved            Must be a single blank space.
+ 19   20    2 N R Z Sequence Number     Generally 01. Sequence number of file in batch (starting from 01). Batches to
+                                        be used where number of detail records exceeds maximum per file of 500.
+ 21   23    3 A - - Bank Name           Three letter APCA abbreviation for bank (CBA, NAB, ANZ, WPC).
+ 24   30    7 F - S Reserved            Must be seven blank spaces.
+ 31   56   26 A L S User Name           The name of the user supplying the file. Some banks must match account holder
+                                        or be specified as "SURNAME Firstname". Must not be blank.
+ 57   62    6 N R Z DE User ID          Direct Entry user ID where allocated. Required for direct debits. For internet
+                                        banking use CBA: 301500, WPC: 037819, ignored by NAB and ANZ.
+ 53   74   12 A L S File Description    A description of the contents of the file. Ignored by CBA.
+ 75   80    6 N - - Processing Date     Date to process transactions as DDMMYY.
+ 81   84    4 A L S Processing Time     Time to process transactions as 24 hr HHmm OR all spaces.
+ 85  120   36 F - S Reserved            Must be thirty six blank spaces.
+
+------------------------------------------------------------------------------------------------------------------------
+Detail Record (Record Type = 1)
+------------------------------------------------------------------------------------------------------------------------
+Must be at least one such record in the file. Must not be first or last record in the file. Must not be more than 500
+such records per file (though that limit may be increased by certain financial institutions).
+
+S.P  E.P  LEN T A F NAME                DESCRIPTION
+  1    1    1 F - - Record Type         Must be 1 for detail record.
+  2    8    7 A L S BSB                 BSB of target account (formatted 000-000).
+  9   17    9 A R S Account Number      Account number of target account (inc leading zeros if part of account number).
+ 18   18    1 A L S Indicator           Must be one of: blank space (nothing indicated), N (this record changes details
+                                        of payee as they occured before?), W (this is a dividend payment to a resident
+                                        of a country with a double tax agreement), X (this is a dividend payment to a
+                                        resident of any other country), Y (this is an interest payment to a non-resident
+                                        of Australia). W, X and Y require that a withholding tax amount be specified.
+ 19   20    2 N R Z Transaction Code    Must be one of: 13 (externally initiated debit), 50 (externally initiated
+                                        credit - normally what is required), 51 (Australian Government Security
+                                        interest), 52 (Family Allowance), 53 (Payroll payment), 54 (Pension payment),
+                                        55 (Allotment), 56 (Dividend), 57 (Debenture or note interest).
+ 21   30   10 N R Z Transaction Amount  Total amount of this transaction as zero-padded number of cents.
+ 31   62   32 A L S Account Name        Name target account is held in, normally as "SURNAME First Second Names".
+ 63   80   18 A L S Lodgement Reference Reference (narration) that appears on target's bank statement.
+ 81   87    7 A L S Trace BSB           BSB of fund (source) account (formatted 000-000).
+ 88   96    9 A L S Trace Account Num   Account number of fund (source) account (inc leading zeros if part of number).
+ 97  112   16 A L S Remitter Name       Name of remitter (appears on target's bank statement; must not be blank but
+                                        some banks will replace with name fund account is held in).
+113  120    8 N R Z Withholding amount  Amount of withholding tax (if Indicator is W, X or Y) or all zeros. If not zero
+                                        then will cause Indicator field to be ignored and tax to be withheld.
+
+------------------------------------------------------------------------------------------------------------------------
+Batch Control Record (Record Type = 7)
+------------------------------------------------------------------------------------------------------------------------
+Must be last record in each file of batch. Must be precisely one such record in each file. EOF should occur at the end
+of this line (no CRLF).
+
+S.P  E.P  LEN T A F NAME                DESCRIPTION
+  1    1    1 F - - Record Type         Must be 7 for batch control record.
+  2    8    7 F - - BSB                 Must be "999-999".
+  9   20   12 F - S Reserved            Must be twelve blank spaces.
+ 21   30   10 N R Z Batch Net Total     Total of credits minus total of debits in batch as zero-padded number of cents.
+ 31   40   10 N R Z Batch Credits Total Total of credits in batch as zero-padded number of cents. Some banks permit
+                                        this to be ignored by placing all zeros or all spaces.
+ 41   50   10 N R Z Batch Debits Total  Total of debits in batch as zero-padded number of cents. Some banks permit
+                                        this to be ignored by placing all zeros or all spaces.
+ 51   74   24 F - S Reserved            Must be twenty four blank spaces.
+ 75   80    6 N R Z Number of records   Must be the total number of detail records in the batch, zero-padded.
+ 81  120   40 F - S Reserved            Must be forty blank spaces.
+ 
+------------------------------------------------------------------------------------------------------------------------
+REFERENCES
+------------------------------------------------------------------------------------------------------------------------
+http://www.cemtexaba.com/aba-format/cemtex-aba-file-format-details.html
+http://ddkonline.blogspot.com.au/2009/01/aba-bank-payment-file-format-australian.html
+http://www.brad-smith.info/blog/archives/405
+http://www.anz.com/Documents/AU/corporate/clientfileformats.pdf
+
+------------------------------------------------------------------------------------------------------------------------
+ABOUT THIS FILE
+------------------------------------------------------------------------------------------------------------------------
+Author:  Michael Cordover
+Email:   aba@mjec.net
+Created: 2013-04-07
+Updated: 2013-04-07
+Version: 1.0
+Licence: CC-BY 3.0 AU <http://creativecommons.org/licenses/by/3.0/au/>
