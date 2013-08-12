@@ -59,7 +59,7 @@ S.P  E.P  LEN T A F NAME                DESCRIPTION
                                         or be specified as "SURNAME Firstname". Must not be blank.
  57   62    6 N R Z DE User ID          Direct Entry user ID where allocated. Required for direct debits. For internet
                                         banking use CBA: 301500, WPC: 037819, ignored by NAB and ANZ.
- 53   74   12 A L S File Description    A description of the contents of the file. Ignored by CBA.
+ 63   74   12 A L S File Description    A description of the contents of the file. Ignored by CBA.
  75   80    6 N - - Processing Date     Date to process transactions as DDMMYY.
  81   84    4 A L S Processing Time     Time to process transactions as 24 hr HHmm OR all spaces.
  85  120   36 F - S Reserved            Must be thirty six blank spaces.
