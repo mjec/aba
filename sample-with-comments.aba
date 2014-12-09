@@ -136,8 +136,8 @@ S.P  E.P  LEN T A F NAME                DESCRIPTION
 FORMAL SPECIFICATION
 ------------------------------------------------------------------------------------------------------------------------
 It turns out there is a formal specification for .aba files. The file type is formally known as a BECS DE file (i.e.
-Bulk Electronic Clearing System Direct Entry file). The file format specification is published by the Australian Payments
-Clearing Association in Appendix C2 (pages 78 - 85) and the character set in Appendix C7 (page 86) of:
+Bulk Electronic Clearing System Direct Entry file). The file format specification is published by the Australian
+Payments Clearing Association in Appendix C2 (pages 78 - 85) and the character set in Appendix C7 (page 86) of:
 http://www.apca.com.au/docs/payment-systems/becs_procedures.pdf
  
 ------------------------------------------------------------------------------------------------------------------------
@@ -155,5 +155,5 @@ Author:  Michael Cordover
 Email:   aba@mjec.net
 Created: 2013-04-07
 Updated: 2013-04-07
-Version: 1.0
+Version: 1.1
 Licence: CC-BY 3.0 AU <http://creativecommons.org/licenses/by/3.0/au/>
