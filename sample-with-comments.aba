@@ -106,7 +106,7 @@ S.P  E.P  LEN T A F NAME                DESCRIPTION
                                         not be all blanks.
  63   80   18 B L S Lodgement Reference Reference (narration) that appears on target's bank statement.
  81   87    7 D L S Trace BSB           BSB of fund (source) account (formatted 000-000).
- 88   96    9 C L S Trace Account Num   Account number of fund (source) account (inc leading zeros if part of number).
+ 88   96    9 C R S Trace Account Num   Account number of fund (source) account (inc leading zeros if part of number).
                                         If account number exceeds nine characters, strip any hyphens.
  97  112   16 B L S Remitter Name       Name of remitter (appears on target's bank statement; must not be blank but
                                         some banks will replace with name fund account is held in).
